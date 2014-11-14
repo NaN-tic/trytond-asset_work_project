@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!-- The COPYRIGHT file at the top level of this repository contains the full
+     copyright notices and license terms. -->
+<data>
+    <xpath expr="/form/label[@name='maintenance']" position="before">
+        <label name="asset"/>
+        <field name="asset"/>
+    </xpath>
+    <xpath expr="/form/field[@name='maintenance']" position="after">
+        <label name="category"/>
+        <field name="category"/>
+    </xpath>
+</data>

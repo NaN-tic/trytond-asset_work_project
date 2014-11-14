@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The COPYRIGHT file at the top level of this repository contains the full
+copyright notices and license terms. -->
+<tryton>
+    <data>
+        <record model="ir.ui.view" id="work_project_view_list">
+            <field name="model">work.project</field>
+            <field name="name">project_list</field>
+            <field name="inherit" ref="work_project.work_project_view_list"/>
+        </record>
+        <record model="ir.ui.view" id="work_project_view_form">
+            <field name="model">work.project</field>
+            <field name="name">project_form</field>
+            <field name="inherit" ref="work_project.work_project_view_form"/>
+        </record>
+    </data>
+</tryton>

@@ -1,0 +1,15 @@
+# 
+msgid ""
+msgstr "Content-Type: text/plain; charset=utf-8\n"
+
+msgctxt "field:work.project,asset:"
+msgid "Asset"
+msgstr "Activo"
+
+msgctxt "field:work.project,asset_maintenances:"
+msgid "Maintenances"
+msgstr "Mantenimentos"
+
+msgctxt "field:work.project,category:"
+msgid "Category"
+msgstr "Categoría"
