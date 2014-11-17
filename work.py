@@ -1,6 +1,6 @@
 # The COPYRIGHT file at the top level of this repository contains the full
 # copyright notices and license terms.
-from trytond.model import fields
+from trytond.model import ModelSQL, fields
 from trytond.pool import Pool, PoolMeta
 from trytond.pyson import Bool, Eval
 
@@ -95,6 +95,12 @@ class Project:
     @classmethod
     def search_maintenance(cls, name, clause):
         return [('asset_maintenances.%s' % name,) + tuple(clause[1:])]
+
+    def asset_maintenance_vals(self, vals):
+        'Returns the values for the work maintenance to be created for self'
+        vals['reference'] = str(self)
+        vals['asset'] = self.asset.id
+        return vals
 
 
 class Maintenance:
