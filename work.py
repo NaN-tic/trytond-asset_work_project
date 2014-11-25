@@ -9,5 +9,4 @@ __metaclass__ = PoolMeta
 
 class Project:
     __name__ = 'work.project'
-    asset = fields.Many2One('asset', 'Asset', required=True,
-        select=True)
+    asset = fields.Many2One('asset', 'Asset', select=True)
