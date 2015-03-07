@@ -3,15 +3,17 @@
 from trytond.model import fields
 from trytond.pool import Pool, PoolMeta
 from trytond.pyson import Eval
-from trytond.transaction import Transaction
 
-__all___ = ['Project', 'ShipmentWork']
+
+__all___ = ['Project', 'ContractLine', 'Contract']
 __metaclass__ = PoolMeta
 
 
 class Project:
     __name__ = 'work.project'
+
     asset = fields.Many2One('asset', 'Asset', select=True)
+    contract_line = fields.Many2One('contract.line', 'Contract Line')
 
     @classmethod
     def __setup__(cls):
@@ -21,19 +23,66 @@ class Project:
                 })
 
 
-class ShipmentWork:
-    __name__ = 'shipment.work'
+class Contract:
+    __name__ = 'contract'
+
+    projects = fields.Function(fields.One2Many('work.project', None,
+            'Projects'),
+        'get_projects', searcher='search_projects')
+
+    def get_projects(self, name):
+        return list(set(p.id for l in self.lines for p in l.projects))
 
     @classmethod
-    def default_employee(cls):
+    def search_projects(cls, name, clause):
+        return [('lines.projects',) + tuple(clause[1:])]
+
+    @classmethod
+    def validate_contract(cls, contracts):
+        super(Contract, cls).validate_contract(contracts)
+        ContractLine = Pool().get('contract.line')
+        lines = []
+        for contract in contracts:
+            lines += contract.lines
+        ContractLine.create_projects(lines)
+
+
+class ContractLine:
+    __name__ = 'contract.line'
+
+    projects = fields.One2Many('work.project', 'contract_line', 'Projects',
+        domain=[
+            ('asset', '=', Eval('asset')),
+            ('maintenance', '=', True),
+            ],
+        depends=['asset'])
+
+    def get_projects(self):
         pool = Pool()
-        Asset = pool.get('asset')
-        asset_id = Transaction().context.get('asset')
-        if asset_id:
-            asset = Asset(asset_id)
-            if hasattr(asset, 'zone') and asset.zone and asset.zone.employee:
-                return asset.zone.employee.id
-        try:
-            return super(ShipmentWork, cls).default_employee()
-        except AttributeError:
-            return None
+        Project = pool.get('work.project')
+        if self.projects or not self.asset:
+            return
+        if not self.asset.owner:
+            self.raise_user_error('no_asset_owner', self.asset.rec_name)
+        project = Project()
+        project.company = self.contract.company
+        project.party = self.asset.owner
+        project.asset = self.asset
+        project.maintenance = True
+        project.start_date = self.contract.start_date
+        project.end_date = self.contract.end_date if self.contract.end_date \
+            else None
+        project.contract_line = self
+        return [project]
+
+    @classmethod
+    def create_projects(cls, lines):
+        pool = Pool()
+        Project = pool.get('work.project')
+        new_projects = []
+        for line in lines:
+            projects = line.get_projects()
+            if projects:
+                new_projects.extend(projects)
+        if new_projects:
+            Project.create([p._save_values for p in new_projects])

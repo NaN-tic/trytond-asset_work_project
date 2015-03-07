@@ -5,6 +5,8 @@
     <xpath expr="/form/label[@name='start_date']" position="before">
         <label name="asset"/>
         <field name="asset"/>
+        <label name="contract_line"/>
+        <field name="contract_line"/>
         <newline/>
     </xpath>
 </data>
