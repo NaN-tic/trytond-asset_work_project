@@ -14,6 +14,8 @@ class Project:
 
     asset = fields.Many2One('asset', 'Asset', select=True)
     contract_line = fields.Many2One('contract.line', 'Contract Line')
+    contract = fields.Function(fields.Many2One('contract', 'Contract'),
+        'get_contract', searcher='search_contract')
 
     @classmethod
     def __setup__(cls):
@@ -21,6 +23,13 @@ class Project:
         cls.work_shipments.context.update({
                 'asset': Eval('asset'),
                 })
+
+    def get_contract(self, name):
+        return self.contract_line and self.contract_line.id
+
+    @classmethod
+    def search_contract(cls, name, clause):
+        return [('contract_line.projects',) + tuple(clause[1:])]
 
 
 class Contract:
