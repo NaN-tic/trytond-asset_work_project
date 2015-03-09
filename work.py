@@ -82,7 +82,7 @@ class ContractLine:
         project.end_date = self.contract.end_date if self.contract.end_date \
             else None
         project.contract_line = self
-        return [project]
+        return project
 
     @classmethod
     def create_projects(cls, lines):
@@ -90,8 +90,8 @@ class ContractLine:
         Project = pool.get('work.project')
         new_projects = []
         for line in lines:
-            projects = line.get_projects()
-            if projects:
-                new_projects.extend(projects)
+            project = line.get_projects()
+            if project:
+                new_projects.append(project)
         if new_projects:
             Project.create([p._save_values for p in new_projects])
