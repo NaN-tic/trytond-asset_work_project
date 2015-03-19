@@ -4,7 +4,6 @@ from trytond.model import fields
 from trytond.pool import Pool, PoolMeta
 from trytond.pyson import Eval
 
-
 __all___ = ['Project', 'ContractLine', 'Contract']
 __metaclass__ = PoolMeta
 
@@ -23,6 +22,14 @@ class Project:
         cls.work_shipments.context.update({
                 'asset': Eval('asset'),
                 })
+        pool = Pool()
+        Asset = pool.get('asset')
+        # If asset_owner module is installed we can add this domain
+        if hasattr(Asset, 'owner'):
+            cls.asset.domain = [
+                ('owner', '=', Eval('party')),
+                ]
+            cls.asset.depends.append('party')
 
     def get_contract(self, name):
         return self.contract_line and self.contract_line.id
