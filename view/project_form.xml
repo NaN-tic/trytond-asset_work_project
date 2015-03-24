@@ -2,7 +2,7 @@
 <!-- The COPYRIGHT file at the top level of this repository contains the full
      copyright notices and license terms. -->
 <data>
-    <xpath expr="/form/label[@name='start_date']" position="before">
+    <xpath expr="/form/field[@name='party']" position="after">
         <label name="asset"/>
         <field name="asset"/>
         <label name="contract_line"/>
