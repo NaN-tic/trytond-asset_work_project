@@ -211,21 +211,6 @@ Create daily service::
     >>> service.save()
 
 
-
-Configure Milestones::
-    >>> Sequence = Model.get('ir.sequence')
-    >>> AccountConfiguration = Model.get('account.configuration')
-    >>> milestone_sequence, = Sequence.find([
-    ...     ('code', '=', 'account.invoice.milestone'),
-    ...     ], limit=1)
-    >>> milestone_group_sequence, = Sequence.find([
-    ...     ('code', '=', 'account.invoice.milestone.group'),
-    ...     ], limit=1)
-    >>> account_config = AccountConfiguration(1)
-    >>> account_config.milestone_sequence = milestone_sequence
-    >>> account_config.milestone_group_sequence = milestone_group_sequence
-    >>> account_config.save()
-
 Models::
     >>> Sequence = Model.get('ir.sequence')
     >>> WorkProjectConfig = Model.get('work.project.configuration')
@@ -250,7 +235,10 @@ Create a contract::
     >>> contract.click('validate_contract')
     >>> contract.state
     u'validated'
-    >>> project, = contract.projects
+    >>> contract.save()
+    >>> contract.reload()
+    >>> projects = contract.projects
+    >>> projects
     >>> project.asset == asset
     True
     >>> project.party == customer

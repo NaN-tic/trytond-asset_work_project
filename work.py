@@ -3,6 +3,8 @@
 from trytond.model import fields
 from trytond.pool import Pool, PoolMeta
 from trytond.pyson import Eval
+from decimal import Decimal
+
 
 __all___ = ['Project', 'ContractLine', 'Contract']
 __metaclass__ = PoolMeta
@@ -12,7 +14,9 @@ class Project:
     __name__ = 'work.project'
 
     asset = fields.Many2One('asset', 'Asset', select=True)
-    contract_line = fields.Many2One('contract.line', 'Contract Line')
+    contract_lines = fields.One2Many('contract.line', 'project',
+        'Contract Lines', domain=[('asset', '=', Eval('asset'))],
+            depends=['asset'])
     contract = fields.Function(fields.Many2One('contract', 'Contract'),
         'get_contract', searcher='search_contract')
 
@@ -32,11 +36,37 @@ class Project:
             cls.asset.depends.append('party')
 
     def get_contract(self, name):
-        return self.contract_line and self.contract_line.id
+        return self.contract_lines and self.contract_lines[0].id
 
     @classmethod
     def search_contract(cls, name, clause):
-        return [('contract_line.projects',) + tuple(clause[1:])]
+        contract = clause[2]
+        ContractLine = Pool().get('contract.line')
+        lines = ContractLine.search([('contract', 'in', contract)])
+        projects = [x.project.id for x in lines if x.project]
+        return [('id', 'in', projects)]
+
+
+    @classmethod
+    def get_amount_to_invoice(cls, projects, names):
+        res = super(Project, cls).get_amount_to_invoice(projects, names)
+        ZERO = Decimal('0.00')
+
+        for project in projects:
+            amount_to_invoice = res['amount_to_invoice'].get(project.id, ZERO)
+            invoiced_amount = res['invoiced_amount'].get(project.id, ZERO)
+            for line in project.contract_lines:
+                for consumption in line.consumptions:
+                    if consumption.invoice_line:
+                        invoice_line, = consumption.invoice_line
+                        invoiced_amount += invoice_line.amount
+                    else:
+                        amount_to_invoice += \
+                            consumption.get_amount_to_invoice()
+
+            res['amount_to_invoice'][project.id] = amount_to_invoice
+            res['invoiced_amount'][project.id] = invoiced_amount
+        return res
 
 
 class Contract:
@@ -47,7 +77,11 @@ class Contract:
         'get_projects', searcher='search_projects')
 
     def get_projects(self, name):
-        return list(set(p.id for l in self.lines for p in l.projects))
+        projects = set()
+        for line in self.lines:
+            if line.project:
+                projects.add(line.project.id)
+        return list(projects)
 
     @classmethod
     def search_projects(cls, name, clause):
@@ -66,7 +100,7 @@ class Contract:
 class ContractLine:
     __name__ = 'contract.line'
 
-    projects = fields.One2Many('work.project', 'contract_line', 'Projects',
+    project = fields.Many2One('work.project', 'Project', select=True,
         domain=[
             ('asset', '=', Eval('asset')),
             ('maintenance', '=', True),
@@ -76,10 +110,19 @@ class ContractLine:
     def get_projects(self):
         pool = Pool()
         Project = pool.get('work.project')
-        if self.projects or not self.asset:
+
+        if self.project or not self.asset:
             return
+
         if not self.asset.owner:
             self.raise_user_error('no_asset_owner', self.asset.rec_name)
+
+        project = Project.search([('asset', '=', self.asset.id)])
+        if project:
+            self.project = project[0].id
+            self.save()
+            return
+
         project = Project()
         project.company = self.contract.company
         project.party = self.asset.owner

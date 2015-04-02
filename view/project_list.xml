@@ -4,6 +4,5 @@
 <data>
     <xpath expr="/tree/field[@name='party']" position="after">
         <field name="asset"/>
-        <field name="contract_line"/>
     </xpath>
 </data>
