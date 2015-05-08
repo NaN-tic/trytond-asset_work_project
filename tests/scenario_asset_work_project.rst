@@ -219,6 +219,16 @@ Models::
     >>> work_project_config.project_sequence = work_project_sequence
     >>> work_project_config.save()
 
+
+Create a project::
+
+    >>> Project = Model.get('work.project')
+    >>> project = Project()
+    >>> project.party = customer
+    >>> project.asset = asset
+    >>> project.maintenance = True
+    >>> project.save()
+
 Create a contract::
 
     >>> Contract = Model.get('contract')
@@ -232,20 +242,10 @@ Create a contract::
     >>> line.create_shipment_work = True
     >>> line.first_shipment_date = today
     >>> line.asset = asset
+    >>> line.project = project
     >>> contract.click('validate_contract')
     >>> contract.state
     u'validated'
-    >>> contract.save()
-    >>> contract.reload()
-    >>> projects = contract.projects
-    >>> projects
-    >>> project.asset == asset
-    True
-    >>> project.party == customer
-    True
-    >>> len(project.work_shipments)
-    0
-    >>> project.save()
 
 Create a shipments::
 
