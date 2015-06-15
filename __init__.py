@@ -7,6 +7,7 @@ from .work import *
 def register():
     Pool.register(
         Project,
+        ShipmentWork,
         ContractLine,
         Contract,
         module='asset_work_project', type_='model')

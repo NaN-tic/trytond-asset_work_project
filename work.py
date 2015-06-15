@@ -1,13 +1,12 @@
 # The COPYRIGHT file at the top level of this repository contains the full
 # copyright notices and license terms.
-from collections import defaultdict
 from decimal import Decimal
 from trytond.model import fields
 from trytond.pool import Pool, PoolMeta
-from trytond.pyson import Eval
+from trytond.pyson import Eval, If, Bool
 
 
-__all___ = ['Project', 'ContractLine', 'Contract']
+__all___ = ['Project', 'ShipmentWork', 'ContractLine', 'Contract']
 __metaclass__ = PoolMeta
 
 
@@ -73,6 +72,18 @@ class Project:
             res['amount_to_invoice'][project.id] = amount_to_invoice
             res['invoiced_amount'][project.id] = invoiced_amount
         return res
+
+
+class ShipmentWork:
+    __name__ = 'shipment.work'
+
+    @classmethod
+    def __setup__(cls):
+        super(ShipmentWork, cls).__setup__()
+        if 'asset' not in cls.project.depends:
+            cls.project.domain.append(If(Bool(Eval('asset')),
+                    ('asset', '=', Eval('asset')), ()))
+            cls.project.depends.append('asset')
 
 
 class Contract:
