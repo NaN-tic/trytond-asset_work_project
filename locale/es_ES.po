@@ -2,6 +2,26 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
+msgctxt "field:contract,projects:"
+msgid "Projects"
+msgstr "Proyectos"
+
+msgctxt "field:contract.line,project:"
+msgid "Project"
+msgstr "Proyecto"
+
 msgctxt "field:work.project,asset:"
 msgid "Asset"
 msgstr "Activo"
+
+msgctxt "field:work.project,contract:"
+msgid "Contract"
+msgstr "Contrato"
+
+msgctxt "field:work.project,contract_lines:"
+msgid "Contract Lines"
+msgstr "Lineas de contratos"
+
+msgctxt "model:ir.action,name:act_project_work_form"
+msgid "Projects"
+msgstr "Proyectos"
