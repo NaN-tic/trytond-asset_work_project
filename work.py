@@ -1,9 +1,10 @@
 # The COPYRIGHT file at the top level of this repository contains the full
 # copyright notices and license terms.
+from collections import defaultdict
+from decimal import Decimal
 from trytond.model import fields
 from trytond.pool import Pool, PoolMeta
 from trytond.pyson import Eval
-from decimal import Decimal
 
 
 __all___ = ['Project', 'ContractLine', 'Contract']
@@ -146,10 +147,13 @@ class ContractLine:
     def create_projects(cls, lines):
         pool = Pool()
         Project = pool.get('work.project')
-        new_projects = []
+        new_projects = {}
         for line in lines:
-            project = line.get_projects()
-            if project:
-                new_projects.append(project)
+            if not line.project and line.asset and line.asset in new_projects:
+                new_projects[line.asset].contract_lines += [line]
+            else:
+                project = line.get_projects()
+                if project:
+                    new_projects[line.asset] = project
         if new_projects:
-            Project.create([p._save_values for p in new_projects])
+            Project.create([p._save_values for p in new_projects.values()])

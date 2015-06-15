@@ -188,6 +188,11 @@ Create an asset::
     >>> asset.product = product
     >>> asset.owner = customer
     >>> asset.save()
+    >>> other_asset = Asset()
+    >>> other_asset.name = 'Other Asset'
+    >>> other_asset.product = product
+    >>> other_asset.owner = customer
+    >>> other_asset.save()
 
 
 Configure shipment work::
@@ -275,3 +280,30 @@ contract::
     >>> project, = contract.projects
     >>> len(project.contract_lines)
     2
+
+When linking the same asset in multiple contract lines only one project is
+created::
+
+    >>> contract = Contract()
+    >>> contract.party = customer
+    >>> contract.start_date = today
+    >>> contract.start_period_date = today
+    >>> contract.freq = 'monthly'
+    >>> line = contract.lines.new()
+    >>> line.service = service
+    >>> line.create_shipment_work = True
+    >>> line.first_shipment_date = today
+    >>> line.asset = other_asset
+    >>> line = contract.lines.new()
+    >>> line.service = service
+    >>> line.asset = other_asset
+    >>> contract.click('validate_contract')
+    >>> project, = contract.projects
+    >>> project.asset == other_asset
+    True
+    >>> bool(project.maintenance)
+    True
+    >>> len(project.contract_lines)
+    2
+    >>> contract.state
+    u'validated'
