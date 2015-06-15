@@ -206,6 +206,7 @@ Create daily service::
     >>> Service = Model.get('contract.service')
     >>> service = Service()
     >>> service.product = service_product
+    >>> service.name = 'Service'
     >>> service.freq = 'daily'
     >>> service.interval = 1
     >>> service.save()
@@ -220,15 +221,6 @@ Models::
     >>> work_project_config.save()
 
 
-Create a project::
-
-    >>> Project = Model.get('work.project')
-    >>> project = Project()
-    >>> project.party = customer
-    >>> project.asset = asset
-    >>> project.maintenance = True
-    >>> project.save()
-
 Create a contract::
 
     >>> Contract = Model.get('contract')
@@ -242,10 +234,17 @@ Create a contract::
     >>> line.create_shipment_work = True
     >>> line.first_shipment_date = today
     >>> line.asset = asset
-    >>> line.project = project
     >>> contract.click('validate_contract')
     >>> contract.state
     u'validated'
+
+A project it's created for the contract::
+
+    >>> project, = contract.projects
+    >>> project.asset == asset
+    True
+    >>> bool(project.maintenance)
+    True
 
 Create a shipments::
 
@@ -263,3 +262,16 @@ The asset has a maintenance planned for the same date::
     >>> asset.reload()
     >>> asset.shipments[0].planned_date == today.date()
     True
+
+Create another contract for the same asset and check it's linked on the same
+contract::
+
+    >>> contract.click('cancel')
+    >>> contract.click('draft')
+    >>> line = contract.lines.new()
+    >>> line.service = service
+    >>> line.asset = asset
+    >>> contract.click('validate_contract')
+    >>> project, = contract.projects
+    >>> len(project.contract_lines)
+    2

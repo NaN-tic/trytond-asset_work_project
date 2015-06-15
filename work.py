@@ -15,8 +15,14 @@ class Project:
 
     asset = fields.Many2One('asset', 'Asset', select=True)
     contract_lines = fields.One2Many('contract.line', 'project',
-        'Contract Lines', domain=[('asset', '=', Eval('asset'))],
-            depends=['asset'])
+        'Contract Lines',
+        domain=[
+            ('asset', '=', Eval('asset')),
+            ],
+        add_remove=[
+            ('project', '=', None),
+            ],
+        depends=['asset'])
     contract = fields.Function(fields.Many2One('contract', 'Contract'),
         'get_contract', searcher='search_contract')
 
@@ -45,7 +51,6 @@ class Project:
         lines = ContractLine.search([('contract', 'in', contract)])
         projects = [x.project.id for x in lines if x.project]
         return [('id', 'in', projects)]
-
 
     @classmethod
     def get_amount_to_invoice(cls, projects, names):
@@ -117,7 +122,10 @@ class ContractLine:
         if not self.asset.owner:
             self.raise_user_error('no_asset_owner', self.asset.rec_name)
 
-        project = Project.search([('asset', '=', self.asset.id)])
+        project = Project.search([
+                ('asset', '=', self.asset.id),
+                ('maintenance', '=', True),
+                ])
         if project:
             self.project = project[0].id
             self.save()
@@ -131,7 +139,7 @@ class ContractLine:
         project.start_date = self.contract.start_date
         project.end_date = self.contract.end_date if self.contract.end_date \
             else None
-        project.contract_line = self
+        project.contract_lines = [self]
         return project
 
     @classmethod
