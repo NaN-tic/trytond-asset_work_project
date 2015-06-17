@@ -242,6 +242,7 @@ Create a contract::
     >>> contract.click('validate_contract')
     >>> contract.state
     u'validated'
+    >>> contract_line, = contract.lines
 
 A project it's created for the contract::
 
@@ -260,6 +261,12 @@ Create a shipments::
     >>> shipments = Shipment.find([])
     >>> shipment = shipments[0]
     >>> shipment.planned_date == today.date()
+    True
+    >>> shipment.contract_line == contract_line
+    True
+    >>> shipment.project == project
+    True
+    >>> shipment.asset == asset
     True
 
 The asset has a maintenance planned for the same date::

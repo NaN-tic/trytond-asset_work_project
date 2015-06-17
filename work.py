@@ -124,6 +124,11 @@ class ContractLine:
             ],
         depends=['asset'])
 
+    def get_shipment_work(self, planned_date):
+        shipment = super(ContractLine, self).get_shipment_work(planned_date)
+        shipment.project = self.project
+        return shipment
+
     def get_projects(self):
         pool = Pool()
         Project = pool.get('work.project')
