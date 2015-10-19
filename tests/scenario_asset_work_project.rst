@@ -237,7 +237,9 @@ Create a contract::
     >>> line = contract.lines.new()
     >>> line.service = service
     >>> line.create_shipment_work = True
+    >>> line.first_invoice_date = today
     >>> line.first_shipment_date = today
+    >>> line.start_date = today
     >>> line.asset = asset
     >>> contract.click('validate_contract')
     >>> contract.state
@@ -283,6 +285,8 @@ contract::
     >>> line = contract.lines.new()
     >>> line.service = service
     >>> line.asset = asset
+    >>> line.first_invoice_date = today
+    >>> line.start_date = today
     >>> contract.click('validate_contract')
     >>> project, = contract.projects
     >>> len(project.contract_lines)
@@ -300,9 +304,13 @@ created::
     >>> line.service = service
     >>> line.create_shipment_work = True
     >>> line.first_shipment_date = today
+    >>> line.first_invoice_date = today
+    >>> line.start_date = today
     >>> line.asset = other_asset
     >>> line = contract.lines.new()
     >>> line.service = service
+    >>> line.first_invoice_date = today
+    >>> line.start_date = today
     >>> line.asset = other_asset
     >>> contract.click('validate_contract')
     >>> project, = contract.projects
