@@ -62,9 +62,11 @@ class Project:
             invoiced_amount = res['invoiced_amount'].get(project.id, ZERO)
             for line in project.contract_lines:
                 for consumption in line.consumptions:
-                    if consumption.invoice_line:
-                        invoice_line, = consumption.invoice_line
-                        invoiced_amount += invoice_line.amount
+                    if consumption.invoice_lines:
+                        for invoice_line in consumption.invoice_lines:
+                            invoiced_amount += invoice_line.amount
+                        for credit_line in consumption.credit_lines:
+                            invoiced_amount -= invoice_line.amount
                     else:
                         amount_to_invoice += \
                             consumption.get_amount_to_invoice()
