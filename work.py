@@ -171,7 +171,7 @@ class ContractLine:
         new_projects = {}
         for line in lines:
             if not line.project and line.asset and line.asset in new_projects:
-                new_projects[line.asset].contract_lines += [line]
+                new_projects[line.asset].contract_lines += (line,)
             else:
                 project = line.get_projects()
                 if project:

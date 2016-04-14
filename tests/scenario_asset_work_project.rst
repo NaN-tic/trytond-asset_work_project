@@ -186,7 +186,6 @@ Create a contract::
     >>> contract.interval = 1
     >>> line = contract.lines.new()
     >>> line.service = service
-    >>> line.create_shipment_work = True
     >>> line.first_shipment_date = today
     >>> line.start_date = today
     >>> line.asset = asset
@@ -203,29 +202,6 @@ A project it's created for the contract::
     >>> bool(project.maintenance)
     True
 
-Create a shipments::
-
-    >>> create_shipments = Wizard('contract.create_shipments')
-    >>> create_shipments.form.date = today + relativedelta(days=+1)
-    >>> create_shipments.execute('create_shipments')
-    >>> Shipment = Model.get('shipment.work')
-    >>> shipments = Shipment.find([])
-    >>> shipment = shipments[0]
-    >>> shipment.planned_date == today.date()
-    True
-    >>> shipment.contract_line == contract_line
-    True
-    >>> shipment.project == project
-    True
-    >>> shipment.asset == asset
-    True
-
-The asset has a maintenance planned for the same date::
-
-    >>> asset.reload()
-    >>> asset.shipments[0].planned_date == today.date()
-    True
-
 Create another contract for the same asset and check it's linked on the same
 contract::
 
@@ -236,7 +212,7 @@ contract::
     >>> line.asset = asset
     >>> line.first_invoice_date = today
     >>> line.start_date = today
-    >>> contract.click('validate_contract')
+    >>> contract.click('confirm')
     >>> project, = contract.projects
     >>> len(project.contract_lines)
     2
@@ -248,20 +224,18 @@ created::
     >>> contract.party = customer
     >>> contract.start_date = today
     >>> contract.start_period_date = today
+    >>> contract.first_invoice_date = today
+    >>> contract.interval = 1
     >>> contract.freq = 'monthly'
     >>> line = contract.lines.new()
     >>> line.service = service
-    >>> line.create_shipment_work = True
-    >>> line.first_shipment_date = today
-    >>> line.first_invoice_date = today
     >>> line.start_date = today
     >>> line.asset = other_asset
     >>> line = contract.lines.new()
     >>> line.service = service
-    >>> line.first_invoice_date = today
     >>> line.start_date = today
     >>> line.asset = other_asset
-    >>> contract.click('validate_contract')
+    >>> contract.click('confirm')
     >>> project, = contract.projects
     >>> project.asset == other_asset
     True
@@ -270,4 +244,4 @@ created::
     >>> len(project.contract_lines)
     2
     >>> contract.state
-    u'validated'
+    u'confirmed'
