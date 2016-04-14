@@ -7,11 +7,11 @@ from trytond.pyson import Eval, If, Bool
 
 
 __all___ = ['Project', 'ShipmentWork', 'ContractLine', 'Contract']
-__metaclass__ = PoolMeta
 
 
 class Project:
     __name__ = 'work.project'
+    __metaclass__ = PoolMeta
 
     asset = fields.Many2One('asset', 'Asset', select=True)
     contract_lines = fields.One2Many('contract.line', 'project',
@@ -37,7 +37,7 @@ class Project:
         # If asset_owner module is installed we can add this domain
         if hasattr(Asset, 'owner'):
             cls.asset.domain = [
-                ('owner', '=', Eval('party')),
+                ('current_owner', '=', Eval('party')),
                 ]
             cls.asset.depends.append('party')
 
@@ -78,6 +78,7 @@ class Project:
 
 class ShipmentWork:
     __name__ = 'shipment.work'
+    __metaclass__ = PoolMeta
 
     @classmethod
     def __setup__(cls):
@@ -90,6 +91,7 @@ class ShipmentWork:
 
 class Contract:
     __name__ = 'contract'
+    __metaclass__ = PoolMeta
 
     projects = fields.Function(fields.One2Many('work.project', None,
             'Projects'),
@@ -107,8 +109,8 @@ class Contract:
         return [('lines.projects',) + tuple(clause[1:])]
 
     @classmethod
-    def validate_contract(cls, contracts):
-        super(Contract, cls).validate_contract(contracts)
+    def confirm(cls, contracts):
+        super(Contract, cls).confirm(contracts)
         ContractLine = Pool().get('contract.line')
         lines = []
         for contract in contracts:
@@ -118,6 +120,7 @@ class Contract:
 
 class ContractLine:
     __name__ = 'contract.line'
+    __metaclass__ = PoolMeta
 
     project = fields.Many2One('work.project', 'Project', select=True,
         domain=[
@@ -138,7 +141,7 @@ class ContractLine:
         if self.project or not self.asset:
             return
 
-        if not self.asset.owner:
+        if not self.asset.current_owner:
             self.raise_user_error('no_asset_owner', self.asset.rec_name)
 
         project = Project.search([
@@ -152,7 +155,7 @@ class ContractLine:
 
         project = Project()
         project.company = self.contract.company
-        project.party = self.asset.owner
+        project.party = self.asset.current_owner
         project.asset = self.asset
         project.maintenance = True
         project.start_date = self.contract.start_date
