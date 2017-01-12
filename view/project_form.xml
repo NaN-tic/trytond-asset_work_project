@@ -8,9 +8,9 @@
         <newline/>
     </xpath>
 
-    <!-- <xpath expr="/form/notebook/page[@id='amounts']" position="after">
+    <xpath expr="/form/notebook/page[@id='amounts']" position="after">
         <page name="contract_lines">
             <field name="contract_lines"/>
         </page>
-    </xpath> -->
+    </xpath>
 </data>

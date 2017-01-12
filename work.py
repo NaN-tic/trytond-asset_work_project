@@ -14,7 +14,7 @@ class Project:
     __metaclass__ = PoolMeta
 
     asset = fields.Many2One('asset', 'Asset', select=True)
-    contract_lines = fields.One2Many('contract.line', 'project',
+    contract_lines = fields.One2Many('contract.line', 'work_project',
         'Contract Lines',
         domain=[
             ('asset', '=', Eval('asset')),
