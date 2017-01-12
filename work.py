@@ -20,7 +20,7 @@ class Project:
             ('asset', '=', Eval('asset')),
             ],
         add_remove=[
-            ('project', '=', None),
+            ('work_project', '=', None),
             ],
         depends=['asset'])
     contract = fields.Function(fields.Many2One('contract', 'Contract'),
@@ -49,7 +49,7 @@ class Project:
         contract = clause[2]
         ContractLine = Pool().get('contract.line')
         lines = ContractLine.search([('contract', 'in', contract)])
-        projects = [x.project.id for x in lines if x.project]
+        projects = [x.work_project.id for x in lines if x.work_project]
         return [('id', 'in', projects)]
 
     @classmethod
@@ -83,10 +83,10 @@ class ShipmentWork:
     @classmethod
     def __setup__(cls):
         super(ShipmentWork, cls).__setup__()
-        if 'asset' not in cls.project.depends:
-            cls.project.domain.append(If(Bool(Eval('asset')),
+        if 'asset' not in cls.work_project.depends:
+            cls.work_project.domain.append(If(Bool(Eval('asset')),
                     ('asset', '=', Eval('asset')), ()))
-            cls.project.depends.append('asset')
+            cls.work_project.depends.append('asset')
 
 
 class Contract:
@@ -100,8 +100,8 @@ class Contract:
     def get_projects(self, name):
         projects = set()
         for line in self.lines:
-            if line.project:
-                projects.add(line.project.id)
+            if line.work_project:
+                projects.add(line.work_project.id)
         return list(projects)
 
     @classmethod
@@ -122,7 +122,7 @@ class ContractLine:
     __name__ = 'contract.line'
     __metaclass__ = PoolMeta
 
-    project = fields.Many2One('work.project', 'Project', select=True,
+    work_project = fields.Many2One('work.project', 'Project', select=True,
         domain=[
             ('asset', '=', Eval('asset')),
             ('maintenance', '=', True),
@@ -131,14 +131,14 @@ class ContractLine:
 
     def get_shipment_work(self, planned_date):
         shipment = super(ContractLine, self).get_shipment_work(planned_date)
-        shipment.project = self.project
+        shipment.work_project = self.work_project
         return shipment
 
     def get_projects(self):
         pool = Pool()
         Project = pool.get('work.project')
 
-        if self.project or not self.asset:
+        if self.work_project or not self.asset:
             return
 
         if not self.asset.current_owner:
