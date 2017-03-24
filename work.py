@@ -122,7 +122,7 @@ class ContractLine:
     __name__ = 'contract.line'
     __metaclass__ = PoolMeta
 
-    work_project = fields.Many2One('work.project', 'Project', select=True,
+    work_project = fields.Many2One('work.project', 'Project (old)', select=True,
         domain=[
             ('asset', '=', Eval('asset')),
             ('maintenance', '=', True),

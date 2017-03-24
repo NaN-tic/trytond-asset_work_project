@@ -1,14 +1,14 @@
-# 
+#
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
 msgctxt "field:contract,projects:"
 msgid "Projects"
-msgstr "Proyectos"
+msgstr "Proyectos (old)"
 
 msgctxt "field:contract.line,project:"
 msgid "Project"
-msgstr "Proyecto"
+msgstr "Proyecto (old)"
 
 msgctxt "field:work.project,asset:"
 msgid "Asset"
@@ -24,4 +24,4 @@ msgstr "Lineas de contratos"
 
 msgctxt "model:ir.action,name:act_project_work_form"
 msgid "Projects"
-msgstr "Proyectos"
+msgstr "Proyectos (old)"
