@@ -111,6 +111,7 @@ class Contract:
     @classmethod
     def confirm(cls, contracts):
         super(Contract, cls).confirm(contracts)
+
         ContractLine = Pool().get('contract.line')
         lines = []
         for contract in contracts:
@@ -135,8 +136,7 @@ class ContractLine:
         return shipment
 
     def get_projects(self):
-        pool = Pool()
-        Project = pool.get('work.project')
+        Project = Pool().get('work.project')
 
         if self.work_project or not self.asset:
             return
@@ -166,15 +166,16 @@ class ContractLine:
 
     @classmethod
     def create_projects(cls, lines):
-        pool = Pool()
-        Project = pool.get('work.project')
+        Project = Pool().get('work.project')
+
         new_projects = {}
         for line in lines:
-            if not line.project and line.asset and line.asset in new_projects:
+            if not line.work_project and line.asset and line.asset in new_projects:
                 new_projects[line.asset].contract_lines += (line,)
             else:
                 project = line.get_projects()
                 if project:
                     new_projects[line.asset] = project
+
         if new_projects:
             Project.create([p._save_values for p in new_projects.values()])
